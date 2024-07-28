@@ -13,7 +13,9 @@ export default function MessageBox({
 		<div
 			className={cn(
 				'p-4 border rounded-xl',
-				speaker === 'ai' ? 'border-sky-400' : 'border-red-400',
+				speaker === 'ai'
+					? 'border-sky-400 bg-sky-200'
+					: 'border-red-400 bg-red-200',
 			)}
 		>
 			<Who speaker={speaker} />

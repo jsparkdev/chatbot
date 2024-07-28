@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs } from '@remix-run/cloudflare'
-import { Form, json, useActionData } from '@remix-run/react'
+import { Form, type MetaFunction, json, useActionData } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 import MessageBox from '~/components/ui/MessageBox'
 import { Button } from '~/components/ui/button'
@@ -54,8 +54,8 @@ export default function ChatBot() {
 
 	return (
 		<div className='sm:px-10 px-4 py-6'>
-			<h1 className='font-bold text-xl mb-4'>ChatBot</h1>
-			<div className='flex flex-col gap-4 mb-10'>
+			<h1 className='font-bold text-2xl mb-4'>LLaMA 3.1 ChatBot</h1>
+			<div className='flex flex-col gap-4 mb-6'>
 				{messages.map((msg, index) => (
 					<MessageBox speaker={msg.role} key={`${new Date()}${index}`}>
 						{msg.message}
@@ -75,7 +75,7 @@ export default function ChatBot() {
 					name='message'
 					value={query}
 					onChange={(event) => setQuery(event.currentTarget.value)}
-					placeholder='메시지를 입력하세요...'
+					placeholder='Enter your message...'
 				/>
 				<Button type='submit' disabled={query.length === 0}>
 					전송
@@ -83,4 +83,14 @@ export default function ChatBot() {
 			</Form>
 		</div>
 	)
+}
+
+export const meta: MetaFunction = () => {
+	return [
+		{ title: 'LLaMA 3.1 Chatbot' },
+		{
+			name: 'description',
+			content: 'LLaMA 3.1 Chatbot',
+		},
+	]
 }

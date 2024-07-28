@@ -17,7 +17,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				{children}
+				<main className='bg-slate-200 max-w-[800px] mx-auto'>{children}</main>
 				<ScrollRestoration />
 				<Scripts />
 			</body>
