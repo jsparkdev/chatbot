@@ -4,51 +4,61 @@ import { useEffect, useState } from 'react'
 import MessageBox from '~/components/ui/MessageBox'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import type { Message, Role } from '~/types'
 
 export async function action({ context, request }: ActionFunctionArgs) {
 	const formData = await request.formData()
 	const message = formData.get('message')
 
 	const messages = [
-		{ role: 'system', content: 'You are a friendly assistant' },
+		{
+			role: 'system',
+			content: 'You can only speak English.',
+		},
 		{
 			role: 'user',
 			content: message ?? 'What is LLaMA 3.1?',
 		},
 	]
 
-	const response = await context.cloudflare.env.AI.run(
+	const { response } = (await context.cloudflare.env.AI.run(
 		// @ts-ignore
 		'@cf/meta/llama-3.1-8b-instruct',
 		{ messages },
-	)
+	)) as { response: string }
 
-	return json({ response })
+	return json({
+		responseObject: {
+			message: response,
+			role: 'ai',
+		},
+	})
 }
 
 export default function ChatBot() {
 	const [query, setQuery] = useState('')
-	const [messages, setMessages] = useState<string[]>([])
+	const [messages, setMessages] = useState<Message[]>([])
 	const actionData = useActionData<typeof action>()
 
 	useEffect(() => {
-		setMessages((prev) =>
-			[...prev, String(actionData?.response.response)].filter(
-				(msg) => msg !== 'undefined',
-			),
-		)
+		setMessages((prev) => {
+			return [
+				...prev,
+				{
+					role: actionData?.responseObject.role as Role,
+					message: actionData?.responseObject.message as string,
+				},
+			].filter((msg) => msg.message)
+		})
 	}, [actionData])
 
 	return (
-		<div className='px-10 py-6'>
+		<div className='sm:px-10 px-4 py-6'>
 			<h1 className='font-bold text-xl mb-4'>ChatBot</h1>
 			<div className='flex flex-col gap-4 mb-10'>
 				{messages.map((msg, index) => (
-					<MessageBox
-						speaker={index % 2 === 0 ? 'user' : 'ai'}
-						key={`${msg.slice(0, 5)}${new Date()}${index}`}
-					>
-						{msg}
+					<MessageBox speaker={msg.role} key={`${new Date()}${index}`}>
+						{msg.message}
 					</MessageBox>
 				))}
 			</div>
@@ -56,7 +66,7 @@ export default function ChatBot() {
 				method='post'
 				className='flex gap-4'
 				onSubmit={() => {
-					setMessages((prev) => [...prev, query])
+					setMessages((prev) => [...prev, { role: 'user', message: query }])
 					setQuery('')
 				}}
 			>
